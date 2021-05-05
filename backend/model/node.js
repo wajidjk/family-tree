@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
-const contactSchema = new Schema(
+const nodeSchema = new Schema(
   {
     firstname: {
       type: String,
@@ -16,12 +16,15 @@ const contactSchema = new Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "node",
     },
-    children: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "node",
-      },
-    ],
+    children: {
+      type: [
+        {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "node",
+        },
+      ],
+      default: [],
+    },
   },
   {
     timestamps: true,
