@@ -9,7 +9,7 @@ const port = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
-app.use("/api", require("./routes/node"));
+app.use("/api/node", require("./routes/node"));
 
 app.listen(port, async () => {
   console.log(`Server is running on port: ${port}`);

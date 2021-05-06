@@ -3,18 +3,19 @@ const Schema = mongoose.Schema;
 
 const nodeSchema = new Schema(
   {
-    firstname: {
+    firstName: {
       type: String,
     },
-    lastname: {
+    lastName: {
       type: String,
     },
     birthday: {
-      type: Date,
+      type: String,
     },
     parent: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "node",
+      default: null,
     },
     children: {
       type: [
