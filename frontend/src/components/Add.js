@@ -1,17 +1,16 @@
-import React from "react";
+import React, { useContext } from "react";
 import { withStyles } from "@material-ui/core/styles";
 import Button from "@material-ui/core/Button";
 import Menu from "@material-ui/core/Menu";
 import MenuItem from "@material-ui/core/MenuItem";
 import ListItemIcon from "@material-ui/core/ListItemIcon";
 import ListItemText from "@material-ui/core/ListItemText";
-import InboxIcon from "@material-ui/icons/MoveToInbox";
-import DraftsIcon from "@material-ui/icons/Drafts";
-import SendIcon from "@material-ui/icons/Send";
+
 import AddCircleOutlineIcon from "@material-ui/icons/AddCircleOutline";
 import SupervisedUserCircleIcon from "@material-ui/icons/SupervisedUserCircle";
 import FaceIcon from "@material-ui/icons/Face";
 import { useHistory, Link } from "react-router-dom";
+import { Store } from "../store";
 
 const StyledMenu = withStyles({
   paper: {
@@ -44,10 +43,9 @@ const StyledMenuItem = withStyles((theme) => ({
   },
 }))(MenuItem);
 
-export default function Add() {
+export default function Add(props) {
   const [anchorEl, setAnchorEl] = React.useState(null);
-
-  const history = useHistory();
+  const { state, setState } = useContext(Store);
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -56,6 +54,7 @@ export default function Add() {
   const handleClose = () => {
     setAnchorEl(null);
   };
+
   return (
     <div>
       <Button
@@ -82,21 +81,26 @@ export default function Add() {
         open={Boolean(anchorEl)}
         onClose={handleClose}
       >
-        <StyledMenuItem>
+        <StyledMenuItem
+          disabled={
+            (state.selected && state.selected.parent) ||
+            (props.node && !state.selected)
+          }
+        >
           <ListItemIcon>
             <SupervisedUserCircleIcon fontSize="small" />
           </ListItemIcon>
           <ListItemText>
-            <Link to={`/insert`}> Add Parent</Link>
+            <Link to={`/insert?case=P`}> Add Parent</Link>
           </ListItemText>
         </StyledMenuItem>
-        <StyledMenuItem>
+        <StyledMenuItem disabled={!state.selected}>
           <ListItemIcon>
             <FaceIcon fontSize="small" />
           </ListItemIcon>
           <ListItemText />
           <ListItemText>
-            <Link to={`/insert`}> Add Children</Link>
+            <Link to={`/insert?case=C`}> Add Children</Link>
           </ListItemText>
         </StyledMenuItem>
       </StyledMenu>

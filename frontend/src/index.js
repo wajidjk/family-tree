@@ -6,6 +6,9 @@ import Homepage from "./pages/Homepage";
 import AddNode from "./components/Modal";
 import { Route, BrowserRouter } from "react-router-dom";
 import { Fragment } from "react";
+import { queryClient } from "./api";
+import { QueryClientProvider } from "react-query";
+import { StoreProvidor } from "./store";
 
 export const Main = () => {
   return (
@@ -23,7 +26,11 @@ export const Main = () => {
 ReactDOM.render(
   <React.StrictMode>
     <BrowserRouter>
-      <Main />
+      <StoreProvidor>
+        <QueryClientProvider client={queryClient}>
+          <Main />
+        </QueryClientProvider>
+      </StoreProvidor>
     </BrowserRouter>
   </React.StrictMode>,
   document.getElementById("root")

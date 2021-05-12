@@ -1,12 +1,16 @@
-import React, { useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import TextField from "@material-ui/core/TextField";
 import Button from "@material-ui/core/Button";
 import DateFnsUtils from "@date-io/date-fns";
+import { useHistory, useLocation } from "react-router-dom";
+import { Store } from "../store";
+
 import {
   KeyboardDatePicker,
   MuiPickersUtilsProvider,
 } from "@material-ui/pickers";
+import { useMutation } from "react-query";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -20,6 +24,39 @@ const useStyles = makeStyles((theme) => ({
 export default function Modal() {
   const classes = useStyles();
   const [selectedDate, setSelectedDate] = React.useState(new Date());
+  const [method, setMethod] = useState();
+  const { state, setState } = useContext(Store);
+  const location = useLocation();
+  const history = useHistory();
+
+  console.log(state);
+
+  const { mutate: addNode } = useMutation(
+    async (input) => {
+      const response = await fetch(`http://localhost:5000/api/node`, {
+        body: JSON.stringify(input),
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+      });
+      console.log(response);
+      return (await response.json()).node;
+    },
+    {
+      onSettled: (data) => {
+        // TODO load the added node
+
+        console.log(data);
+        history.push(`/?id=${data._id}`);
+      },
+    }
+  );
+
+  useEffect(() => {
+    setMethod(new URLSearchParams(location.search).get("case"));
+  }, []);
 
   const handleDateChange = (date) => {
     setSelectedDate(date);
@@ -27,8 +64,7 @@ export default function Modal() {
 
   const [firstname, setFirstname] = useState("");
   const [lastname, setLastname] = useState("");
-  console.log(firstname);
-  console.log(lastname);
+
   return (
     <div className="main_div">
       <div className="Modal_div">
@@ -66,6 +102,15 @@ export default function Modal() {
         <br />
         <br />
         <Button
+          onClick={() => {
+            addNode({
+              firstName: firstname,
+              lastName: lastname,
+              birthday: selectedDate,
+              targetId: state.selected?._id,
+              procedure: method,
+            });
+          }}
           style={{
             fontSize: 18,
             fontWeight: "bold",

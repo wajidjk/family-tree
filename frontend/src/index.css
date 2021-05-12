@@ -37,6 +37,11 @@ code {
   border-radius: 15px;
   overflow: hidden;
 }
+
+.center_div .header {
+  display: flex;
+  justify-content: space-between;
+}
 .Modal_div {
   max-width: 700px;
   width: 450px;
@@ -65,4 +70,7 @@ code {
   left: 20px;
   top: 0;
   transform: translateY(-50%);
+}
+.card.selected {
+  border: 3px solid rgb(175 29 85);
 }
