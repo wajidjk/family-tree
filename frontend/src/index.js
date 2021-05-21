@@ -1,39 +1,80 @@
-import React from "react";
-import ReactDOM from "react-dom";
-import "./index.css";
-import reportWebVitals from "./reportWebVitals";
-import Homepage from "./pages/Homepage";
-import AddNode from "./components/Modal";
-import { Route, BrowserRouter } from "react-router-dom";
-import { Fragment } from "react";
-import { queryClient } from "./api";
-import { QueryClientProvider } from "react-query";
-import { StoreProvidor } from "./store";
+import React from 'react';
+import ReactDOM from 'react-dom';
+import './index.css';
+import reportWebVitals from './reportWebVitals';
+import Homepage from './pages/Homepage';
+import AddNode from './components/Modal';
+import { Route, BrowserRouter } from 'react-router-dom';
+import { Fragment } from 'react';
+import { queryClient } from './api';
+import { QueryClientProvider } from 'react-query';
+import { StoreProvidor } from './store';
 
 export const Main = () => {
-  return (
-    <Fragment>
-      <Route exact path="/">
-        <Homepage />
-      </Route>
-      <Route exact path="/insert">
-        <AddNode />
-      </Route>
-    </Fragment>
-  );
+    return (
+        <Fragment>
+            <Route exact path="/">
+                <Homepage />
+            </Route>
+            <Route exact path="/insert">
+                <AddNode />
+            </Route>
+        </Fragment>
+    );
 };
 
 ReactDOM.render(
-  <React.StrictMode>
-    <BrowserRouter>
-      <StoreProvidor>
-        <QueryClientProvider client={queryClient}>
-          <Main />
-        </QueryClientProvider>
-      </StoreProvidor>
-    </BrowserRouter>
-  </React.StrictMode>,
-  document.getElementById("root")
+    <React.StrictMode>
+        <BrowserRouter>
+            <StoreProvidor>
+                <QueryClientProvider client={queryClient}>
+                    <Main />
+                </QueryClientProvider>
+            </StoreProvidor>
+        </BrowserRouter>
+    </React.StrictMode>,
+    document.getElementById('root'),
 );
 
 reportWebVitals();
+
+const fetchNode = async id => {
+    let url = 'http://localhost:5000/api/node';
+    if (id) {
+        url += `?id=${id}`;
+    }
+
+    const response = await fetch(url);
+    const result = await response.json();
+
+    return result.node[0];
+};
+
+(async () => {
+    const tree = [];
+
+    const fetchChildren = async node => {
+        if (!node.children.length) return [];
+        node.children = await Promise.all(
+            node.children
+                .filter(el => el)
+                .map(async id => {
+                    const _node = await fetchNode(id);
+
+                    if (_node.children) {
+                        _node.children = await fetchChildren(_node);
+                    }
+                    return _node;
+                }),
+        );
+
+        return node.children;
+    };
+
+    const node = await fetchNode();
+    node.children = await fetchChildren(node);
+
+    console.log({
+        node,
+    });
+})();
