@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 import reportWebVitals from './reportWebVitals';
@@ -9,6 +9,7 @@ import { Fragment } from 'react';
 import { queryClient } from './api';
 import { QueryClientProvider } from 'react-query';
 import { StoreProvidor } from './store';
+import moment from 'moment';
 
 export const Main = () => {
     return (
@@ -23,21 +24,6 @@ export const Main = () => {
     );
 };
 
-ReactDOM.render(
-    <React.StrictMode>
-        <BrowserRouter>
-            <StoreProvidor>
-                <QueryClientProvider client={queryClient}>
-                    <Main />
-                </QueryClientProvider>
-            </StoreProvidor>
-        </BrowserRouter>
-    </React.StrictMode>,
-    document.getElementById('root'),
-);
-
-reportWebVitals();
-
 const fetchNode = async id => {
     let url = 'http://localhost:5000/api/node';
     if (id) {
@@ -50,9 +36,18 @@ const fetchNode = async id => {
     return result.node[0];
 };
 
-(async () => {
-    const tree = [];
+const printNode = ({ firstName, lastName, birthday, children }) => {
+    return (
+        <Fragment>
+            <li>
+                <span>{`${firstName} ${lastName} (${moment(new Date(birthday)).format(`DD-MM-YYYY`)})`}</span>
+                {children.length ? <ul>{children.map(e => printNode(e))}</ul> : null}
+            </li>
+        </Fragment>
+    );
+};
 
+const getData = async () => {
     const fetchChildren = async node => {
         if (!node.children.length) return [];
         node.children = await Promise.all(
@@ -74,7 +69,30 @@ const fetchNode = async id => {
     const node = await fetchNode();
     node.children = await fetchChildren(node);
 
-    console.log({
-        node,
-    });
-})();
+    return node;
+};
+
+const MyComponent = () => {
+    const [node, setNode] = useState();
+
+    useEffect(() => {
+        (async () => {
+            setNode(await getData());
+        })();
+    }, []);
+
+    return node ? printNode(node) : <h1>loading</h1>;
+};
+
+ReactDOM.render(
+    <React.StrictMode>
+        <BrowserRouter>
+            <StoreProvidor>
+                <QueryClientProvider client={queryClient}>
+                    <Main />
+                </QueryClientProvider>
+            </StoreProvidor>
+        </BrowserRouter>
+    </React.StrictMode>,
+    document.getElementById('root'),
+);
